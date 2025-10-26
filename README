@@ -1,0 +1,7 @@
+# 🧠 Proyecto Backend I - Primera Entrega
+
+Este proyecto corresponde a la **Primera Entrega** del curso **Backend I** (CoderHouse).  
+Se desarrolló un servidor en **Node.js** con **Express**, que permite gestionar productos y carritos de compra, utilizando el sistema de archivos para la persistencia de datos (sin base de datos).
+
+---
+
