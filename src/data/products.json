@@ -9,5 +9,16 @@
     "stock": 20,
     "category": "harinas",
     "thumbnails": []
+  },
+  {
+    "id": 2,
+    "title": "Harina de soja",
+    "description": "Molida fina",
+    "code": "H-001",
+    "price": 4500,
+    "status": true,
+    "stock": 30,
+    "category": "harinas",
+    "thumbnails": []
   }
 ]

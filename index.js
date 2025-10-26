@@ -11,5 +11,6 @@ app.use("/api/carts", carritosRouter);
 
 const PUERTO = 8080;
 app.listen(PUERTO, () => {
-  console.log("Servidor en http://localhost:" + PUERTO);
+  console.log(`Servidor en http://localhost:${PUERTO}`);
+
 });
