@@ -1,0 +1,68 @@
+
+<style>
+  /* Tabs simples sin librerías */
+  .tabs { max-width: 900px; margin: 16px auto; }
+  .tab-links { display: flex; gap: 8px; border-bottom: 1px solid #ddd; }
+  .tab-links a {
+    padding: 8px 12px; text-decoration: none; color: #333;
+    border: 1px solid transparent; border-top-left-radius: 6px; border-top-right-radius: 6px;
+  }
+  .tab-links a.active { border-color: #ddd #ddd #fff; background: #fff; }
+  .tab-content { border: 1px solid #ddd; border-top: none; padding: 16px; background: #fff; }
+</style>
+
+<h1>{{tituloPagina}}</h1>
+
+<div class="tabs" id="tabs">
+  <div class="tab-links">
+    <a href="#productos" data-tab="productos" class="active">Productos</a>
+    <a href="#realtime" data-tab="realtime">Tiempo real</a>
+  </div>
+
+  <div class="tab-content" id="contenido-tabs">
+    <!-- Contenido inicial (Productos) -->
+    <div data-panel="productos">
+      <p>Acá voy a listar los productos del sistema (HTTP). 👇</p>
+      <ul id="lista-home">
+        <li>Ejemplo: Harina integral — $4500</li>
+      </ul>
+    </div>
+
+    <!-- Panel Tiempo real -->
+    <div data-panel="realtime" style="display:none">
+      <p>Para ver los productos en vivo y formularios de crear/eliminar, entrá acá:</p>
+      <p><a href="/realtimeproducts">/realtimeproducts</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var cont = document.getElementById("contenido-tabs");
+    var links = document.querySelectorAll('.tab-links a');
+
+    function activar(tab){
+      // links
+      links.forEach(function(a){
+        a.classList.toggle('active', a.dataset.tab === tab);
+      });
+      // panels
+      var panels = cont.querySelectorAll('[data-panel]');
+      panels.forEach(function(p){
+        p.style.display = (p.getAttribute('data-panel') === tab) ? 'block' : 'none';
+      });
+    }
+
+    links.forEach(function(a){
+      a.addEventListener('click', function(e){
+        e.preventDefault();
+        activar(a.dataset.tab);
+        history.replaceState(null, '', '#' + a.dataset.tab); // actualizar hash
+      });
+    });
+
+    // Si hay hash en la URL, abrir esa pestaña
+    var hash = location.hash.replace('#','');
+    if(hash === 'realtime' || hash === 'productos'){ activar(hash); }
+  })();
+</script>

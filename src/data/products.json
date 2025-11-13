@@ -15,10 +15,32 @@
     "title": "Harina de soja",
     "description": "Molida fina",
     "code": "H-001",
-    "price": 4500,
+    "price": 4200,
     "status": true,
     "stock": 30,
     "category": "harinas",
+    "thumbnails": []
+  },
+  {
+    "id": 3,
+    "title": "Harina de trigo",
+    "description": "Molida fina",
+    "code": "H-001",
+    "price": 4000,
+    "status": true,
+    "stock": 40,
+    "category": "harinas",
+    "thumbnails": []
+  },
+  {
+    "id": 4,
+    "title": "Harina de centeno",
+    "price": 3000,
+    "code": "4",
+    "stock": 14,
+    "description": "",
+    "status": true,
+    "category": "sin-categoria",
     "thumbnails": []
   }
 ]
