@@ -42,16 +42,5 @@
     "status": true,
     "category": "sin-categoria",
     "thumbnails": []
-  },
-  {
-    "id": 5,
-    "title": "harina de algarroba",
-    "price": 2000,
-    "code": "5",
-    "stock": 16,
-    "description": "",
-    "status": true,
-    "category": "sin-categoria",
-    "thumbnails": []
   }
 ]
