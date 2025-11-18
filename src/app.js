@@ -2,6 +2,7 @@ import express from "express";
 import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
+import viewsRouter from "./routes/views.router.js";
 
 // Rutas API
 import productosRouter from "./routes/products.router.js";
@@ -27,17 +28,8 @@ app.set("views", path.join(__dirname, "..", "views"));
 app.use("/public", express.static(path.join(__dirname, "public")));
 
 // Rutas de vistas
-app.get("/", function (req, res) {
-  res.render("home", {
-    layout: "main",
-    tituloPagina: "Inicio",
-    mensaje: "¡Funciona Handlebars!",
-  });
-});
+app.use("/", viewsRouter);
 
-app.get("/realtimeproducts", function (req, res) {
-  res.render("realtimeproducts", { layout: false, tituloPagina: "Productos en tiempo real" });
-});
 
 // Rutas API existentes
 app.use("/api/products", productosRouter);
