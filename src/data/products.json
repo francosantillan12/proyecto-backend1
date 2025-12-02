@@ -1,16 +1,5 @@
 [
   {
-    "id": 1,
-    "title": "Harina integral",
-    "description": "Molida fina",
-    "code": "H-001",
-    "price": 4500,
-    "status": true,
-    "stock": 20,
-    "category": "harinas",
-    "thumbnails": []
-  },
-  {
     "id": 2,
     "title": "Harina de soja",
     "description": "Molida fina",
@@ -38,6 +27,17 @@
     "price": 3000,
     "code": "4",
     "stock": 14,
+    "description": "",
+    "status": true,
+    "category": "sin-categoria",
+    "thumbnails": []
+  },
+  {
+    "id": 5,
+    "title": "harina de algarroba",
+    "price": 2650,
+    "code": "5",
+    "stock": 10,
     "description": "",
     "status": true,
     "category": "sin-categoria",

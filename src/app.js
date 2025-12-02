@@ -3,6 +3,20 @@ import { engine } from "express-handlebars";
 import path from "path";
 import { fileURLToPath } from "url";
 import viewsRouter from "./routes/views.router.js";
+import dotenv from "dotenv";
+import mongoose from "mongoose";
+
+
+dotenv.config();
+
+mongoose
+  .connect(process.env.MONGO_URL)
+  .then(function () {
+    console.log("✅ Conectado a MongoDB Atlas");
+  })
+  .catch(function (error) {
+    console.log("❌ Error al conectar a MongoDB:", error);
+  });
 
 // Rutas API
 import productosRouter from "./routes/products.router.js";

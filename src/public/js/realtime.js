@@ -5,7 +5,6 @@ socket.on("connect", function () {
   console.log("🟢 Conectado por websockets. ID:", socket.id);
 });
 
-// (dejamos este log para confirmar que el archivo carga)
 console.log("✅ realtime.js cargado correctamente");
 
 socket.on("productosActuales", function (productos) {
