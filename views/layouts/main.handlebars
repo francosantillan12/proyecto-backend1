@@ -3,8 +3,22 @@
 <head>
   <meta charset="utf-8" />
   <title>{{tituloPagina}}</title>
+  <link rel="stylesheet" href="/public/css/style.css">
 </head>
 <body>
-  {{{body}}}
+  <header>
+    <div class="logo">Mi Ecommerce</div>
+    <nav>
+      <a href="/">Inicio</a>
+      <a href="/products">Productos</a>
+      <a href="/realtimeproducts">Tiempo real</a>
+      <a href="/carts/692ef67f7023abf125bb1b08" class="cart-icon">🛒 Carrito</a>
+    </nav>
+  </header>
+
+  <main>
+    {{{body}}}
+  </main>
 </body>
 </html>
+

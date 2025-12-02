@@ -19,10 +19,14 @@ socket.on("productosActuales", function (productos) {
   }
 
   lista.innerHTML = productos
-    .map(function (p) {
-      return `<li><strong>${p.title || p.titulo || "(sin título)"}</strong> — $${p.price || p.precio} (Stock: ${p.stock ?? "-"})<br><small>ID: ${p.id}</small></li>`;
-    })
-    .join("");
+  .map(function (p) {
+    return `<li>
+      <strong>${p.titulo || p.title || "(sin título)"}</strong> — $${p.precio || p.price} (Stock: ${p.stock ?? "-"})
+      <br><small>ID: ${p._id}</small>
+    </li>`;
+  })
+  .join("");
+
 });
 
 
@@ -37,16 +41,16 @@ socket.on("productosActuales", function (productos) {
     var datos = {
       title: formCrear.titulo.value.trim(),
       price: Number(formCrear.precio.value),
-      code: formCrear.codigo.value.trim(),
-      stock: Number(formCrear.stock.value)
-      // Puedo agregar más campos si luego los sumamos al form:
-      // description, status, category, thumbnails, etc.
+      stock: Number(formCrear.stock.value),
+      category: formCrear.categoria.value.trim(),
+      description: formCrear.description.value.trim()
     };
-
-    if (!datos.title || !datos.code || isNaN(datos.price) || isNaN(datos.stock)) {
+    
+    if (!datos.title || isNaN(datos.price) || isNaN(datos.stock)) {
       console.log("⚠️ Datos inválidos", datos);
       return;
     }
+    
 
     console.log("📤 Enviando crearProducto:", datos);
     socket.emit("crearProducto", datos);

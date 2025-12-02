@@ -2,12 +2,13 @@
 
 <ul>
   {{#each productos}}
-    <li>
+    <li data-id="{{_id}}">
       <strong>{{titulo}}</strong><br>
       {{descripcion}}<br>
       Precio: $ {{precio}}<br>
       Categoría: {{categoria}}<br>
-      Stock: {{stock}}
+      Stock: {{stock}}<br>
+      <button class="boton-agregar">Agregar al carrito</button>
     </li>
     <hr>
   {{/each}}
@@ -24,3 +25,32 @@
     <a href="{{nextLink}}">Siguiente ➡</a>
   {{/if}}
 </div>
+
+<script>
+  // 👉 PONÉ ACÁ EL ID DE UN CARRITO REAL
+  const idCarrito = "692ef67f7023abf125bb1b08";
+
+  const botones = document.querySelectorAll(".boton-agregar");
+
+  botones.forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      const li = boton.closest("li");
+      const idProducto = li.dataset.id;
+
+      fetch(`/api/carts/${idCarrito}/products/${idProducto}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" }
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (data) {
+          alert("Producto agregado al carrito");
+        })
+        .catch(function (error) {
+          console.log("Error al agregar al carrito:", error);
+          alert("No se pudo agregar el producto al carrito");
+        });
+    });
+  });
+</script>

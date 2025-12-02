@@ -42,5 +42,16 @@
     "status": true,
     "category": "sin-categoria",
     "thumbnails": []
+  },
+  {
+    "id": 6,
+    "title": "semillas de lino",
+    "price": 2010,
+    "code": "6",
+    "stock": 22,
+    "description": "",
+    "status": true,
+    "category": "sin-categoria",
+    "thumbnails": []
   }
 ]

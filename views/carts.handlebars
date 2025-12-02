@@ -1,0 +1,60 @@
+<h1>{{tituloPagina}}</h1>
+
+<h2>ID del carrito: {{carrito._id}}</h2>
+
+{{#if carrito.products.length}}
+  <ul>
+    {{#each carrito.products}}
+
+      {{!-- Si el producto ya no existe en Mongo, NO lo mostramos --}}
+      {{#if this.product}}
+
+        <li>
+          <strong>{{this.product.titulo}}</strong><br>
+          Precio: $ {{this.product.precio}}<br>
+          Categoría: {{this.product.categoria}}<br>
+          Cantidad en carrito: {{this.quantity}}<br>
+
+          <button
+            class="btn-eliminar"
+            data-pid="{{this.product._id}}"
+          >
+            Eliminar del carrito
+          </button>
+        </li>
+        <hr>
+
+      {{/if}}
+
+    {{/each}}
+  </ul>
+{{else}}
+  <p>El carrito está vacío.</p>
+{{/if}}
+
+<script>
+  const idCarrito = "{{carrito._id}}";
+
+  const botones = document.querySelectorAll(".btn-eliminar");
+
+  botones.forEach(function (boton) {
+    boton.addEventListener("click", function () {
+      const idProducto = boton.dataset.pid;
+
+      fetch(`/api/carts/${idCarrito}/products/${idProducto}`, {
+        method: "DELETE"
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function () {
+          alert("Producto eliminado del carrito");
+          location.reload();
+        })
+        .catch(function (error) {
+          console.log("Error al eliminar producto del carrito:", error);
+          alert("No se pudo eliminar el producto");
+        });
+    });
+  });
+</script>

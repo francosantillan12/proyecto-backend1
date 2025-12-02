@@ -1,5 +1,7 @@
 import { Router } from "express";
 import ProductoModel from "../model/producto.model.js";
+import CarritoModel from "../model/carrito.model.js";
+
 
 const router = Router();
 
@@ -13,10 +15,10 @@ router.get("/", function (req, res) {
 
 router.get("/realtimeproducts", function (req, res) {
   res.render("realtimeproducts", {
-    layout: false,
     tituloPagina: "Productos en tiempo real",
   });
 });
+
 
 // Vista de productos con paginación
 router.get("/products", async (req, res) => {
@@ -66,6 +68,29 @@ router.get("/products", async (req, res) => {
   } catch (error) {
     console.error("Error al renderizar /products:", error);
     res.status(500).send("Error al cargar la vista de productos");
+  }
+});
+
+router.get("/carts/:cid", async (req, res) => {
+  try {
+    const { cid } = req.params;
+
+    const carrito = await CarritoModel.findById(cid).populate("products.product");
+
+    if (!carrito) {
+      return res.status(404).send("Carrito no encontrado");
+    }
+
+    const carritoPlano = carrito.toObject();
+
+    res.render("carts", {
+      layout: "main",
+      tituloPagina: "Carrito",
+      carrito: carritoPlano
+    });
+  } catch (error) {
+    console.error("Error al renderizar /carts/:cid:", error);
+    res.status(500).send("Error al cargar el carrito");
   }
 });
 
