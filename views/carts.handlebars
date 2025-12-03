@@ -1,19 +1,28 @@
 <h1>{{tituloPagina}}</h1>
 
-<h2>ID del carrito: {{carrito._id}}</h2>
+<h2>Carrito</h2>
+<p class="carrito-id">ID del carrito: {{carrito._id}}</p>
+
+<!-- Botón para vaciar carrito -->
+<button id="btn-vaciar" class="btn-vaciar">Vaciar carrito</button>
 
 {{#if carrito.products.length}}
-  <ul>
+  <ul class="carrito-lista">
     {{#each carrito.products}}
-
-      {{!-- Si el producto ya no existe en Mongo, NO lo mostramos --}}
       {{#if this.product}}
+        <li class="carrito-card">
+          <h3 class="producto-titulo">{{this.product.titulo}}</h3>
 
-        <li>
-          <strong>{{this.product.titulo}}</strong><br>
-          Precio: $ {{this.product.precio}}<br>
-          Categoría: {{this.product.categoria}}<br>
-          Cantidad en carrito: {{this.quantity}}<br>
+          <p class="producto-descripcion">
+            {{this.product.descripcion}}
+          </p>
+
+          <p class="producto-detalle">
+            <span class="precio">💰 $ {{this.product.precio}}</span>
+            <span class="categoria">🥫 {{this.product.categoria}}</span>
+            <span class="stock">📦 Stock: {{this.product.stock}}</span>
+            <span class="cantidad">🛒 Cantidad en carrito: {{this.quantity}}</span>
+          </p>
 
           <button
             class="btn-eliminar"
@@ -22,10 +31,7 @@
             Eliminar del carrito
           </button>
         </li>
-        <hr>
-
       {{/if}}
-
     {{/each}}
   </ul>
 {{else}}
@@ -35,26 +41,51 @@
 <script>
   const idCarrito = "{{carrito._id}}";
 
-  const botones = document.querySelectorAll(".btn-eliminar");
+  /* ================================
+     ELIMINAR UN SOLO PRODUCTO
+     ================================ */
+  const botonesEliminar = document.querySelectorAll(".btn-eliminar");
 
-  botones.forEach(function (boton) {
+  botonesEliminar.forEach(function (boton) {
     boton.addEventListener("click", function () {
       const idProducto = boton.dataset.pid;
 
       fetch(`/api/carts/${idCarrito}/products/${idProducto}`, {
         method: "DELETE"
       })
-        .then(function (res) {
-          return res.json();
-        })
-        .then(function () {
+        .then(res => res.json())
+        .then(() => {
           alert("Producto eliminado del carrito");
           location.reload();
         })
-        .catch(function (error) {
-          console.log("Error al eliminar producto del carrito:", error);
+        .catch(error => {
+          console.log("Error al eliminar producto:", error);
           alert("No se pudo eliminar el producto");
         });
     });
   });
+
+  /* ================================
+     VACIAR CARRITO COMPLETO
+     ================================ */
+  const btnVaciar = document.getElementById("btn-vaciar");
+
+  if (btnVaciar) {
+    btnVaciar.addEventListener("click", function () {
+      if (!confirm("¿Seguro que querés vaciar TODO el carrito?")) return;
+
+      fetch(`/api/carts/${idCarrito}`, {
+        method: "DELETE"
+      })
+        .then(res => res.json())
+        .then(() => {
+          alert("Carrito vaciado");
+          location.reload();
+        })
+        .catch(error => {
+          console.log("Error al vaciar carrito:", error);
+          alert("No se pudo vaciar el carrito");
+        });
+    });
+  }
 </script>

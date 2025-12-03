@@ -48,7 +48,6 @@ router.get("/:cid", async (req, res) => {
     res.json(carrito);
   } catch (error) {
     console.error("Error al obtener el carrito:", error);
-    // 👇 por ahora mandamos el mensaje real para ver qué pasa
     res.status(500).json({ error: "No se pudo obtener el carrito", detalle: error.message });
   }
 });

@@ -25,10 +25,10 @@ router.get("/products", async (req, res) => {
   try {
     const { page, limit } = req.query;
 
-    const limitNumber = parseInt(limit) || 2; // mostramos 2 productos por página (después lo podés cambiar)
+    const limitNumber = parseInt(limit) || 2; // mostramos 2 productos por página (después lo puedo cambiar)
     const pageNumber = parseInt(page) || 1;
 
-    const filtro = {}; // más adelante, si querés, acá podemos usar query=categoria
+    const filtro = {}; 
 
     const totalDocs = await ProductoModel.countDocuments(filtro);
     const totalPages = Math.ceil(totalDocs / limitNumber) || 1;

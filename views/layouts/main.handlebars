@@ -12,13 +12,46 @@
       <a href="/">Inicio</a>
       <a href="/products">Productos</a>
       <a href="/realtimeproducts">Tiempo real</a>
-      <a href="/carts/692ef67f7023abf125bb1b08" class="cart-icon">🛒 Carrito</a>
+      <!-- link del carrito con ID fijo -->
+      <a href="/carts/692f4a6704c6724b6f50e2e5" class="cart-icon" id="link-carrito">
+    🛒 Carrito
+  </a>
+
     </nav>
   </header>
 
   <main>
     {{{body}}}
   </main>
+
+  <script>
+    (function () {
+      const idCarrito = "692f4a6704c6724b6f50e2e5";
+      const link = document.getElementById("link-carrito");
+      if (!link) return;
+
+      fetch(`/api/carts/${idCarrito}`)
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (data) {
+          if (!data || !Array.isArray(data.products)) return;
+
+          // sumamos las cantidades de cada producto
+          const total = data.products.reduce(function (acc, item) {
+            return acc + (item.quantity || 0);
+          }, 0);
+
+          if (total > 0) {
+            link.textContent = `🛒 Carrito (${total})`;
+          } else {
+            link.textContent = "🛒 Carrito";
+          }
+        })
+        .catch(function (error) {
+          console.log("No se pudo obtener el carrito:", error);
+        });
+    })();
+  </script>
 </body>
 </html>
-

@@ -1,42 +1,48 @@
-# 🧩 Proyecto Backend I — Entrega N°2
+🛒 Proyecto Backend I – E-commerce
 
-### 💬 Descripción general
-Proyecto desarrollado en Node.js utilizando **Express**, **Handlebars** y **Socket.io**, correspondiente a la segunda entrega del curso **Backend I (CoderHouse)**.  
-El objetivo fue implementar un sistema de productos con actualización en tiempo real mediante WebSockets.
+Este es mi proyecto final del curso Backend I.
+La idea es simular el backend de un e-commerce con productos, carritos, persistencia en MongoDB y vistas con Handlebars.
 
----
+🚀 Tecnologías usadas
 
-## 🚀 Funcionalidades principales
+Node.js
 
-### 🟢 Servidor Express
-- Configurado en `src/app.js` con estructura modular.
-- Endpoints base:
-  - `/` → vista principal con pestañas (Productos / Tiempo Real)
-  - `/realtimeproducts` → vista con conexión a WebSockets
-  - `/api/products` → listado HTTP de productos (JSON)
-  - `/api/carts` → rutas de carritos (sin cambios desde la entrega 1)
+Express
 
-### 🟠 Handlebars (motor de plantillas)
-- Configurado con layout principal `views/layouts/main.handlebars`.
-- Vistas:
-  - `home.handlebars`: vista principal con pestañas y fetch HTTP.
-  - `realtimeproducts.handlebars`: interfaz en tiempo real con formularios para crear y eliminar productos.
+MongoDB + Mongoose
 
-### 🔵 WebSockets (Socket.io)
-- Configuración en `index.js` con eventos:
-  - `productosActuales` → envía la lista inicial de productos.
-  - `crearProducto` → agrega un nuevo producto al archivo `products.json`.
-  - `eliminarProducto` → elimina un producto existente por ID.
-  - Ambos actualizan automáticamente la lista en todos los clientes conectados.
+Handlebars
 
-### 🟣 ProductManager
-- Clase ubicada en `src/managers/ProductManager.js`.
-- Maneja lectura y escritura del archivo `src/data/products.json`.
-- Métodos implementados:
-  - `getProducts()`
-  - `addProduct(producto)`
+Socket.io
 
----
+ES Modules
 
-## 📂 Estructura del proyecto...
+📦 Funcionalidades principales
+✔ Productos
+
+Listado paginado con filtros y ordenamiento
+(/api/products?limit=&page=&query=&sort=)
+
+Búsqueda por categoría o disponibilidad.
+
+CRUD completo.
+
+Vista HTML /products con paginación.
+
+✔ Carrito
+
+Crear carrito.
+
+Agregar, eliminar, actualizar cantidad, vaciar carrito.
+
+Populate de productos.
+
+Vista /carts/:cid mostrando los productos del carrito.
+
+✔ Tiempo real
+
+Crear y eliminar productos usando WebSockets.
+Vista: /realtimeproducts.
+
+
 

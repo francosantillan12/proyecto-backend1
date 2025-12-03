@@ -1,34 +1,39 @@
 <h1>{{tituloPagina}}</h1>
 
-<ul>
+<ul class="lista-productos">
   {{#each productos}}
-    <li data-id="{{_id}}">
-      <strong>{{titulo}}</strong><br>
-      {{descripcion}}<br>
-      Precio: $ {{precio}}<br>
-      Categoría: {{categoria}}<br>
-      Stock: {{stock}}<br>
+    <li class="producto-card" data-id="{{_id}}">
+      <h2 class="producto-titulo">{{titulo}}</h2>
+      <p class="producto-descripcion">{{descripcion}}</p>
+
+      <p class="producto-detalle">
+        <span class="precio">💰 $ {{precio}}</span>
+        <span class="categoria">🥫 {{categoria}}</span>
+        <span class="stock">📦 Stock: {{stock}}</span>
+      </p>
+
       <button class="boton-agregar">Agregar al carrito</button>
     </li>
-    <hr>
   {{/each}}
 </ul>
 
-<div>
+<div class="paginacion">
   <p>Página {{page}} de {{totalPages}}</p>
 
-  {{#if hasPrevPage}}
-    <a href="{{prevLink}}">⬅ Anterior</a>
-  {{/if}}
+  <div class="paginacion-links">
+    {{#if hasPrevPage}}
+      <a href="{{prevLink}}">⬅ Anterior</a>
+    {{/if}}
 
-  {{#if hasNextPage}}
-    <a href="{{nextLink}}">Siguiente ➡</a>
-  {{/if}}
+    {{#if hasNextPage}}
+      <a href="{{nextLink}}">Siguiente ➡</a>
+    {{/if}}
+  </div>
 </div>
 
 <script>
-  // 👉 PONÉ ACÁ EL ID DE UN CARRITO REAL
-  const idCarrito = "692ef67f7023abf125bb1b08";
+  // 👉 ID del carrito (por ahora fijo, como veníamos usando)
+  const idCarrito = "692f4a6704c6724b6f50e2e5";
 
   const botones = document.querySelectorAll(".boton-agregar");
 
@@ -44,7 +49,7 @@
         .then(function (res) {
           return res.json();
         })
-        .then(function (data) {
+        .then(function () {
           alert("Producto agregado al carrito");
         })
         .catch(function (error) {
