@@ -283,3 +283,9 @@
 .btn-vaciar:hover {
   background-color: #e00000;
 }
+
+
+.saludo {
+  margin: 10px 0;
+  font-weight: bold;
+}

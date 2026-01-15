@@ -20,8 +20,13 @@ export default router;*/
 import { Router } from "express";
 import CarritoModel from "../model/carrito.model.js";
 import ProductoModel from "../model/producto.model.js";
+import { auth } from "../middlewares/auth.js";
+
 
 const router = Router();
+
+router.use(auth);
+
 
 // POST /api/carts → crea un carrito vacío en Mongo
 router.post("/", async (req, res) => {

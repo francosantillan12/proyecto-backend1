@@ -5,7 +5,8 @@ import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import session from "express-session";
-
+import passport from "passport";
+import { inicializarPassport } from "./config/passport.config.js";
 
 // Rutas
 import viewsRouter from "./routes/views.router.js";
@@ -41,6 +42,34 @@ app.use(
     saveUninitialized: true,
   })
 );
+
+// Passport
+inicializarPassport();
+app.use(passport.initialize());
+app.use(passport.session());
+
+// 👉 Disponibilizar usuario en TODAS las vistas
+// PRIORIDAD: req.session.usuario (tiene carritoId)
+app.use(function (req, res, next) {
+  if (req.session && req.session.usuario) {
+    res.locals.usuario = req.session.usuario;
+    return next();
+  }
+
+  // Fallback: req.user (documento mongoose) pero sin carritoId
+  if (req.user) {
+    res.locals.usuario = {
+      id: req.user._id,
+      nombre: req.user.nombre,
+      email: req.user.email,
+      rol: req.user.rol,
+    };
+    return next();
+  }
+
+  res.locals.usuario = null;
+  next();
+});
 
 // Handlebars
 app.engine(

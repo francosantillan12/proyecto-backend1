@@ -95,4 +95,19 @@ router.get("/carts/:cid", async (req, res) => {
 });
 
 
+router.get("/login", function (req, res) {
+  res.render("login", {
+    layout: "main",
+    tituloPagina: "Login"
+  });
+});
+
+router.get("/register", function (req, res) {
+  res.render("register", {
+    layout: "main",
+    tituloPagina: "Registro"
+  });
+});
+
+
 export default router;

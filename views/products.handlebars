@@ -32,13 +32,18 @@
 </div>
 
 <script>
-  // 👉 ID del carrito (por ahora fijo, como veníamos usando)
-  const idCarrito = "692f4a6704c6724b6f50e2e5";
+  // 👉 ID del carrito del usuario logueado
+  const idCarrito = "{{#if usuario}}{{usuario.carritoId}}{{/if}}";
 
   const botones = document.querySelectorAll(".boton-agregar");
 
   botones.forEach(function (boton) {
     boton.addEventListener("click", function () {
+      if (!idCarrito) {
+        alert("Tenés que iniciar sesión para agregar al carrito");
+        return;
+      }
+
       const li = boton.closest("li");
       const idProducto = li.dataset.id;
 
@@ -49,7 +54,11 @@
         .then(function (res) {
           return res.json();
         })
-        .then(function () {
+        .then(function (data) {
+          if (data && data.error) {
+            alert(data.error);
+            return;
+          }
           alert("Producto agregado al carrito");
         })
         .catch(function (error) {
@@ -59,3 +68,4 @@
     });
   });
 </script>
+

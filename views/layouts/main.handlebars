@@ -8,36 +8,58 @@
 <body>
   <header>
     <div class="logo">Mi Ecommerce</div>
+
     <nav>
       <a href="/">Inicio</a>
       <a href="/products">Productos</a>
       <a href="/realtimeproducts">Tiempo real</a>
-      <!-- link del carrito con ID fijo -->
-      <a href="/carts/692f4a6704c6724b6f50e2e5" class="cart-icon" id="link-carrito">
-    🛒 Carrito
-  </a>
 
+      {{!-- Links según sesión --}}
+      {{#if usuario}}
+        <a href="#" id="btn-logout">Cerrar sesión</a>
+      {{else}}
+        <a href="/login">Iniciar sesión</a>
+        <a href="/register">Registrarse</a>
+      {{/if}}
+
+      {{!-- Link del carrito: si hay usuario, usa su carritoId --}}
+      {{#if usuario}}
+        <a href="/carts/{{usuario.carritoId}}" class="cart-icon" id="link-carrito">
+          🛒 Carrito
+        </a>
+      {{else}}
+        <a href="/login" class="cart-icon" id="link-carrito">
+          🛒 Carrito
+        </a>
+      {{/if}}
     </nav>
   </header>
 
   <main>
+    {{#if usuario}}
+      <p class="saludo">Hola, {{usuario.nombre}} 👋</p>
+    {{/if}}
+
     {{{body}}}
   </main>
 
   <script>
     (function () {
-      const idCarrito = "692f4a6704c6724b6f50e2e5";
+      // Si no hay sesión, no intentamos pedir el carrito
+      const idCarrito = "{{#if usuario}}{{usuario.carritoId}}{{/if}}";
+      if (!idCarrito) return;
+
       const link = document.getElementById("link-carrito");
       if (!link) return;
 
       fetch(`/api/carts/${idCarrito}`)
         .then(function (res) {
+          if (!res.ok) return null; // si es 401, no rompe el script
           return res.json();
         })
         .then(function (data) {
           if (!data || !Array.isArray(data.products)) return;
 
-          // sumamos las cantidades de cada producto
           const total = data.products.reduce(function (acc, item) {
             return acc + (item.quantity || 0);
           }, 0);
@@ -51,6 +73,23 @@
         .catch(function (error) {
           console.log("No se pudo obtener el carrito:", error);
         });
+    })();
+
+    (function () {
+      const btn = document.getElementById("btn-logout");
+      if (!btn) return;
+
+      btn.addEventListener("click", function (e) {
+        e.preventDefault();
+
+        fetch("/api/sessions/logout", { method: "POST" })
+          .then(function () {
+            window.location.href = "/login";
+          })
+          .catch(function () {
+            window.location.href = "/login";
+          });
+      });
     })();
   </script>
 </body>

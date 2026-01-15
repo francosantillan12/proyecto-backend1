@@ -1,0 +1,55 @@
+<h1>Registro</h1>
+
+<form id="form-register">
+  <label>Nombre</label>
+  <input type="text" name="nombre" required>
+
+  <label>Email</label>
+  <input type="email" name="email" required>
+
+  <label>Password</label>
+  <input type="password" name="password" required>
+
+  <button type="submit">Crear cuenta</button>
+</form>
+
+<p id="mensaje"></p>
+
+<script>
+  (function () {
+    const form = document.getElementById("form-register");
+    const mensaje = document.getElementById("mensaje");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const data = {
+        nombre: form.nombre.value,
+        email: form.email.value,
+        password: form.password.value
+      };
+
+      fetch("/api/sessions/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data)
+      })
+        .then(function (res) {
+          return res.json();
+        })
+        .then(function (info) {
+          if (info.error) {
+            mensaje.textContent = info.error;
+            return;
+          }
+
+          mensaje.textContent = "Usuario creado ✅";
+          // vamos al login
+          window.location.href = "/login";
+        })
+        .catch(function () {
+          mensaje.textContent = "Error al registrar";
+        });
+    });
+  })();
+</script>
