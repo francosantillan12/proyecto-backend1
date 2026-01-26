@@ -2,10 +2,11 @@ import { Router } from "express";
 import passport from "passport";
 import CarritoModel from "../model/carrito.model.js";
 import UsuarioModel from "../model/usuario.model.js";
+import jwt from "jsonwebtoken";
 
 const router = Router();
 
-// Ruta de error de Passport
+// Ruta de error de Passport (registro)
 router.get("/error", function (req, res) {
   res.status(400).send({
     error:
@@ -13,11 +14,17 @@ router.get("/error", function (req, res) {
   });
 });
 
-// REGISTER con Passport
+// Error de LOGIN
+router.get("/error-login", function (req, res) {
+  return res.status(401).send({ error: "Credenciales inválidas" });
+});
+
+// REGISTER con Passport (sin session)
 router.post(
   "/register",
   passport.authenticate("registro", {
     failureRedirect: "/api/sessions/error",
+    session: false,
   }),
   function (req, res) {
     const usuario = req.user;
@@ -27,62 +34,79 @@ router.post(
       message: "Usuario registrado",
       usuario: {
         id: usuario._id,
-        nombre: usuario.nombre,
+        first_name: usuario.first_name,
+        last_name: usuario.last_name,
         email: usuario.email,
-        rol: usuario.rol,
+        age: usuario.age,
+        role: usuario.role,
+        cart: usuario.cart,
       },
     });
   }
 );
 
-// LOGIN con Passport + carrito persistente por usuario
+// LOGIN con Passport + JWT en cookie (sin session)
 router.post(
   "/login",
   passport.authenticate("login", {
-    failureRedirect: "/api/sessions/error",
+    failureRedirect: "/api/sessions/error-login",
+    session: false,
   }),
   function (req, res) {
     const usuario = req.user;
 
-    // 1) Si ya tiene carrito asignado, lo usamos
-    if (usuario.carritoId) {
-      req.session.usuario = {
-        id: usuario._id,
-        nombre: usuario.nombre,
-        email: usuario.email,
-        rol: usuario.rol,
-        carritoId: usuario.carritoId,
-      };
+    const emitirTokenYResponder = function (usuarioFinal) {
+      const token = jwt.sign(
+        {
+          id: usuarioFinal._id,
+          first_name: usuarioFinal.first_name,
+          last_name: usuarioFinal.last_name,
+          email: usuarioFinal.email,
+          age: usuarioFinal.age,
+          role: usuarioFinal.role,
+          cart: usuarioFinal.cart,
+        },
+        process.env.JWT_SECRET,
+        { expiresIn: "1h" }
+      );
+
+      res.cookie("cookieToken", token, {
+        httpOnly: true,
+        maxAge: 60 * 60 * 1000,
+        sameSite: "lax",
+      });
 
       return res.send({
         status: "ok",
         message: "Login correcto",
-        usuario: req.session.usuario,
+        usuario: {
+          id: usuarioFinal._id,
+          first_name: usuarioFinal.first_name,
+          last_name: usuarioFinal.last_name,
+          email: usuarioFinal.email,
+          age: usuarioFinal.age,
+          role: usuarioFinal.role,
+          cart: usuarioFinal.cart,
+        },
       });
+    };
+
+    // Si ya tiene cart asignado, respondemos
+    if (usuario.cart) {
+      return emitirTokenYResponder(usuario);
     }
 
-    // 2) Si NO tiene carrito, lo creamos y lo guardamos en el usuario
+    // Si NO tiene cart, lo creamos y lo guardamos en el usuario
     CarritoModel.create({ products: [] })
       .then(function (carrito) {
         return UsuarioModel.findByIdAndUpdate(
           usuario._id,
-          { carritoId: carrito._id },
+          { cart: carrito._id },
           { new: true }
-        ).then(function (usuarioActualizado) {
-          req.session.usuario = {
-            id: usuarioActualizado._id,
-            nombre: usuarioActualizado.nombre,
-            email: usuarioActualizado.email,
-            rol: usuarioActualizado.rol,
-            carritoId: usuarioActualizado.carritoId,
-          };
-
-          return res.send({
-            status: "ok",
-            message: "Login correcto",
-            usuario: req.session.usuario,
-          });
-        });
+        );
+      })
+      .then(function (usuarioActualizado) {
+        return emitirTokenYResponder(usuarioActualizado);
       })
       .catch(function (error) {
         console.log("Error creando/asignando carrito:", error);
@@ -93,164 +117,19 @@ router.post(
   }
 );
 
-// CURRENT
-router.get("/current", function (req, res) {
-  // Si hay sesión, devolvemos lo más útil (incluye carritoId)
-  if (req.session && req.session.usuario) {
-    return res.send({ usuario: req.session.usuario });
+// CURRENT (valida JWT desde cookie)
+router.get(
+  "/current",
+  passport.authenticate("current", { session: false }),
+  function (req, res) {
+    return res.send({ usuario: req.user });
   }
+);
 
-  if (!req.user) {
-    return res.status(401).send({ error: "No hay sesión activa" });
-  }
-
-  res.send({
-    usuario: {
-      id: req.user._id,
-      nombre: req.user.nombre,
-      email: req.user.email,
-      rol: req.user.rol,
-      carritoId: req.user.carritoId || null,
-    },
-  });
-});
-
-// LOGOUT
+// LOGOUT (borra cookie JWT)
 router.post("/logout", function (req, res) {
-  if (req.logout) {
-    req.logout(function () {
-      req.session.destroy(function (err) {
-        if (err) {
-          return res.status(500).send({ error: "Error al cerrar sesión" });
-        }
-        res.send({ status: "ok", message: "Logout correcto" });
-      });
-    });
-  } else {
-    req.session.destroy(function (err) {
-      if (err) {
-        return res.status(500).send({ error: "Error al cerrar sesión" });
-      }
-      res.send({ status: "ok", message: "Logout correcto" });
-    });
-  }
+  res.clearCookie("cookieToken");
+  return res.send({ status: "ok", message: "Logout correcto" });
 });
 
 export default router;
-
-
-
-
-
-
-
-
-
-/*
-import { Router } from "express";
-import UsuarioModel from "../model/usuario.model.js";
-import { createHash, isValidPassword } from "../utils.js";
-
-const router = Router();
-
-router.post("/register", function (req, res) {
-  const { nombre, email, password } = req.body;
-
-  if (!nombre || !email || !password) {
-    return res.status(400).send({ error: "Faltan datos" });
-  }
-
-  UsuarioModel.findOne({ email: email })
-    .then(function (usuario) {
-      if (usuario) {
-        return res.status(409).send({ error: "El email ya está registrado" });
-      }
-
-      const nuevoUsuario = {
-        nombre: nombre,
-        email: email,
-        password: createHash(password),
-        rol: "user"
-      };
-
-      return UsuarioModel.create(nuevoUsuario);
-    })
-    .then(function (usuarioCreado) {
-      // si ya respondimos con 409 arriba, usuarioCreado puede venir undefined
-      if (!usuarioCreado) return;
-
-      res.status(201).send({
-        status: "ok",
-        message: "Usuario registrado",
-        usuario: {
-          id: usuarioCreado._id,
-          nombre: usuarioCreado.nombre,
-          email: usuarioCreado.email,
-          rol: usuarioCreado.rol
-        }
-      });
-    })
-    .catch(function (error) {
-      console.log("Error register:", error);
-      res.status(500).send({ error: "Error del servidor" });
-    });
-});
-
-router.post("/login", function (req, res) {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).send({ error: "Faltan datos" });
-  }
-
-  UsuarioModel.findOne({ email: email })
-    .then(function (usuario) {
-      if (!usuario) {
-        return res.status(401).send({ error: "Credenciales inválidas" });
-      }
-
-      const okPassword = isValidPassword(password, usuario.password);
-      if (!okPassword) {
-        return res.status(401).send({ error: "Credenciales inválidas" });
-      }
-
-      req.session.usuario = {
-        id: usuario._id,
-        nombre: usuario.nombre,
-        email: usuario.email,
-        rol: usuario.rol
-      };
-
-      res.send({
-        status: "ok",
-        message: "Login correcto",
-        usuario: req.session.usuario
-      });
-    })
-    .catch(function (error) {
-      console.log("Error login:", error);
-      res.status(500).send({ error: "Error del servidor" });
-    });
-});
-
-router.get("/current", function (req, res) {
-  if (!req.session || !req.session.usuario) {
-    return res.status(401).send({ error: "No hay sesión activa" });
-  }
-
-  res.send({ usuario: req.session.usuario });
-});
-
-router.post("/logout", function (req, res) {
-  req.session.destroy(function (err) {
-    if (err) {
-      return res.status(500).send({ error: "Error al cerrar sesión" });
-    }
-    res.send({ status: "ok", message: "Logout correcto" });
-  });
-});
-
-
-
-export default router;
-*/

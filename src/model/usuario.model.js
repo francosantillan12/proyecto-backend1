@@ -1,9 +1,13 @@
 import mongoose from "mongoose";
 
-const usuariosCollection = "usuarios";
+const usersCollection = "users";
 
-const usuariosSchema = new mongoose.Schema({
-  nombre: {
+const usersSchema = new mongoose.Schema({
+  first_name: {
+    type: String,
+    required: true
+  },
+  last_name: {
     type: String,
     required: true
   },
@@ -12,27 +16,26 @@ const usuariosSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
+  age: {
+    type: Number,
+    required: true
+  },
   password: {
     type: String,
     required: true
   },
-  rol: {
-    type: String,
-    default: "user"
-  },
-  carritoId: {
+  cart: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "carritos",
+    ref: "carritos", // ⚠️ tiene que coincidir con el nombre del mongoose.model(...) de tu CarritoModel
     default: null
   },
-  fechaCreacion: {
-    type: Date,
-    default: Date.now
+  role: {
+    type: String,
+    default: "user"
   }
 });
 
+const UserModel = mongoose.model(usersCollection, usersSchema);
 
+export default UserModel;
 
-const UsuarioModel = mongoose.model(usuariosCollection, usuariosSchema);
-
-export default UsuarioModel;

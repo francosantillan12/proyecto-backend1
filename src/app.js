@@ -4,8 +4,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import mongoose from "mongoose";
-import session from "express-session";
 import passport from "passport";
+import cookieParser from "cookie-parser";
 import { inicializarPassport } from "./config/passport.config.js";
 
 // Rutas
@@ -13,6 +13,7 @@ import viewsRouter from "./routes/views.router.js";
 import productosRouter from "./routes/products.router.js";
 import carritosRouter from "./routes/carts.router.js";
 import sessionsRouter from "./routes/sessions.router.js";
+import usersRouter from "./routes/users.router.js";
 
 dotenv.config();
 
@@ -34,41 +35,23 @@ const app = express();
 
 // Middlewares base
 app.use(express.json());
+app.use(cookieParser());
 
-app.use(
-  session({
-    secret: "coderoder123",
-    resave: true,
-    saveUninitialized: true,
-  })
-);
-
-// Passport
+// Passport (JWT)
 inicializarPassport();
 app.use(passport.initialize());
-app.use(passport.session());
 
-// 👉 Disponibilizar usuario en TODAS las vistas
-// PRIORIDAD: req.session.usuario (tiene carritoId)
+// 👉 Disponibilizar usuario en TODAS las vistas (desde JWT si existe)
 app.use(function (req, res, next) {
-  if (req.session && req.session.usuario) {
-    res.locals.usuario = req.session.usuario;
+  // si hay token en cookie, intentamos autenticar y cargar req.user
+  passport.authenticate("current", { session: false }, function (err, user) {
+    if (user) {
+      res.locals.usuario = user;
+    } else {
+      res.locals.usuario = null;
+    }
     return next();
-  }
-
-  // Fallback: req.user (documento mongoose) pero sin carritoId
-  if (req.user) {
-    res.locals.usuario = {
-      id: req.user._id,
-      nombre: req.user.nombre,
-      email: req.user.email,
-      rol: req.user.rol,
-    };
-    return next();
-  }
-
-  res.locals.usuario = null;
-  next();
+  })(req, res, next);
 });
 
 // Handlebars
@@ -90,6 +73,7 @@ app.use("/", viewsRouter);
 app.use("/api/products", productosRouter);
 app.use("/api/carts", carritosRouter);
 app.use("/api/sessions", sessionsRouter);
+app.use("/api/users", usersRouter);
 
 // Ruta de test
 app.get("/ping", function (req, res) {
