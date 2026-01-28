@@ -28,23 +28,31 @@
       fetch("/api/sessions/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data)
       })
         .then(function (res) {
-          return res.json();
+          return res
+            .json()
+            .catch(function () {
+              return null;
+            })
+            .then(function (info) {
+              if (!res.ok) {
+                const msg = info && (info.error || info.message)
+                  ? (info.error || info.message)
+                  : "Email o contraseña inválidos";
+                throw new Error(msg);
+              }
+              return info;
+            });
         })
         .then(function (info) {
-          if (info.error) {
-            mensaje.textContent = info.error;
-            return;
-          }
-
           mensaje.textContent = "Login correcto ✅";
-          // redirigimos a productos
           window.location.href = "/products";
         })
-        .catch(function () {
-          mensaje.textContent = "Error al loguear";
+        .catch(function (error) {
+          mensaje.textContent = error && error.message ? error.message : "Error al loguear";
         });
     });
   })();

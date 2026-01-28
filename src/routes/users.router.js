@@ -1,8 +1,13 @@
+import { authJwt } from "../middlewares/authJwt.js";
+import { soloAdmin } from "../middlewares/soloAdmin.js";
+
 import { Router } from "express";
 import mongoose from "mongoose";
 import UsuarioModel from "../model/usuario.model.js";
 
 const router = Router();
+
+router.use(authJwt, soloAdmin);
 
 // GET /api/users → listar usuarios (sin password)
 router.get("/", function (req, res) {

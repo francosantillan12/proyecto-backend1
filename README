@@ -1,48 +1,80 @@
-🛒 Proyecto Backend I – E-commerce
+# Proyecto Backend – Ecommerce  
+## Backend I + Backend II (CoderHouse)
 
-Este es mi proyecto final del curso Backend I.
-La idea es simular el backend de un e-commerce con productos, carritos, persistencia en MongoDB y vistas con Handlebars.
+Este proyecto corresponde a la **continuación del ecommerce desarrollado durante el curso Backend I**, el cual fue extendido y mejorado en **Backend II** incorporando un sistema completo de **autenticación, autorización y gestión de usuarios**.
 
-🚀 Tecnologías usadas
+El objetivo principal es integrar **Passport + JWT** al proyecto existente, manteniendo la lógica previa de productos y carritos, y logrando una aplicación backend funcional y segura.
 
-Node.js
+---
 
-Express
+## 🧱 Stack Tecnológico
 
-MongoDB + Mongoose
+- Node.js  
+- Express  
+- MongoDB Atlas  
+- Mongoose  
+- Handlebars  
+- Passport  
+  - LocalStrategy (register / login)  
+  - JWT Strategy (`current`)  
+- bcrypt  
+- JSON Web Tokens (JWT)  
+- Cookies httpOnly  
 
-Handlebars
+---
 
-Socket.io
+## 👤 Modelo de Usuario
 
-ES Modules
+- `first_name`
+- `last_name`
+- `email` (único)
+- `age`
+- `password` (encriptada con bcrypt)
+- `cart` (referencia a `Carts`)
+- `role` (valor por defecto: `"user"`)
 
-📦 Funcionalidades principales
-✔ Productos
+Las contraseñas se almacenan **hasheadas** utilizando `bcrypt`.
 
-Listado paginado con filtros y ordenamiento
-(/api/products?limit=&page=&query=&sort=)
+---
 
-Búsqueda por categoría o disponibilidad.
+## 🔐 Autenticación y Autorización
 
-CRUD completo.
+### Passport Local
+- Registro de usuarios
+- Login con validación de contraseña
 
-Vista HTML /products con paginación.
+### JWT
+- En el login se genera un **token JWT**
+- El token se guarda en una **cookie httpOnly**
+- No se utilizan sesiones de Express
 
-✔ Carrito
+### Estrategia `current`
+- Valida al usuario a partir del JWT almacenado en la cookie
+- Permite proteger rutas privadas
+- Endpoint implementado:
 
-Crear carrito.
 
-Agregar, eliminar, actualizar cantidad, vaciar carrito.
+---
 
-Populate de productos.
+## 🛒 Carritos
 
-Vista /carts/:cid mostrando los productos del carrito.
+- Cada usuario tiene **un carrito propio**
+- El carrito se crea automáticamente al registrarse o al iniciar sesión
+- Las rutas de carritos están protegidas con JWT
+- Un usuario solo puede modificar **su propio carrito**
 
-✔ Tiempo real
+---
 
-Crear y eliminar productos usando WebSockets.
-Vista: /realtimeproducts.
+## 🖥️ Integración Frontend + Backend
+
+El proyecto incluye vistas con **Handlebars** integradas al backend:
+
+- Registro desde la vista
+- Login desde la vista
+- Navbar dinámico según estado de sesión
+- Agregar productos al carrito solo estando autenticado
+- Logout que elimina la cookie JWT
+
 
 
 

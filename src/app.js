@@ -46,10 +46,15 @@ app.use(function (req, res, next) {
   // si hay token en cookie, intentamos autenticar y cargar req.user
   passport.authenticate("current", { session: false }, function (err, user) {
     if (user) {
-      res.locals.usuario = user;
+      res.locals.usuario = {
+        ...user,
+        nombre: user.first_name,
+        carritoId: user.cart
+      };
     } else {
       res.locals.usuario = null;
     }
+    
     return next();
   })(req, res, next);
 });
@@ -67,6 +72,11 @@ app.set("views", path.join(__dirname, "..", "views"));
 
 // Archivos estáticos
 app.use("/public", express.static(path.join(__dirname, "public")));
+
+// Middlewares base
+app.use(express.json());
+app.use(express.urlencoded({ extended: true })); // 👈 ESTE ES EL QUE FALTABA
+app.use(cookieParser());
 
 // Rutas
 app.use("/", viewsRouter);

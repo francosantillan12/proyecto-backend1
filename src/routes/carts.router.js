@@ -1,33 +1,16 @@
-/*import { Router } from "express";
-import CartManager from "../managers/CartManager.js";
-
-const router = Router();
-const manager = new CartManager("./src/data/carts.json");
-
-// POST /api/carts  → crea un nuevo carrito { id, products: [] }
-router.post("/", async (req, res) => {
-  try {
-    const carrito = await manager.createCart();
-    res.status(201).json(carrito);
-  } catch (error) {
-    console.error("Error al crear carrito:", error);
-    res.status(500).json({ error: "Error al crear el carrito" });
-  }
-});
-
-export default router;*/
 
 import { Router } from "express";
 import CarritoModel from "../model/carrito.model.js";
 import ProductoModel from "../model/producto.model.js";
-import { auth } from "../middlewares/auth.js";
+import passport from "passport";
+
 
 
 const router = Router();
 
-router.use(auth);
 
-
+// Protege TODAS las rutas de carts con JWT (cookieToken)
+router.use(passport.authenticate("current", { session: false }));
 // POST /api/carts → crea un carrito vacío en Mongo
 router.post("/", async (req, res) => {
   try {
@@ -57,10 +40,17 @@ router.get("/:cid", async (req, res) => {
   }
 });
 
-//  agregar un producto al carrito
+// agregar un producto al carrito
 router.post("/:cid/products/:pid", async (req, res) => {
   try {
     const { cid, pid } = req.params;
+
+    // 🔐 Solo puede modificar su propio carrito
+    if (String(req.user.cart) !== String(cid)) {
+      return res
+        .status(403)
+        .json({ error: "No podés modificar este carrito" });
+    }
 
     // 1. Verificar que el carrito exista
     const carrito = await CarritoModel.findById(cid);
@@ -82,25 +72,29 @@ router.post("/:cid/products/:pid", async (req, res) => {
     );
 
     if (indiceProducto !== -1) {
-      // Si ya existe, incrementamos la cantidad en 1
+      // Si ya existe, incrementamos la cantidad
       carrito.products[indiceProducto].quantity += 1;
     } else {
       // Si no existe, lo agregamos con cantidad 1
       carrito.products.push({
         product: pid,
-        quantity: 1
+        quantity: 1,
       });
     }
 
     // 4. Guardar el carrito actualizado
     const carritoActualizado = await carrito.save();
 
-    res.json(carritoActualizado);
+    return res.json(carritoActualizado);
+
   } catch (error) {
     console.error("Error al agregar producto al carrito:", error);
-    res.status(500).json({ error: "No se pudo agregar el producto al carrito" });
+    return res
+      .status(500)
+      .json({ error: "No se pudo agregar el producto al carrito" });
   }
 });
+
 
 // eliminar un producto puntual del carrito
 router.delete("/:cid/products/:pid", async (req, res) => {

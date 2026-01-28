@@ -24,7 +24,9 @@
       e.preventDefault();
 
       const data = {
-        nombre: form.nombre.value,
+        first_name: form.nombre.value,
+        last_name: "-",   // default para pasar la validación
+        age: 18,          // default para pasar la validación
         email: form.email.value,
         password: form.password.value
       };
@@ -32,23 +34,27 @@
       fetch("/api/sessions/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(data)
       })
         .then(function (res) {
-          return res.json();
+          return res.json().catch(function () { return null; })
+            .then(function (info) {
+              if (!res.ok) {
+                const msg = info && (info.error || info.message)
+                  ? (info.error || info.message)
+                  : "No se pudo registrar";
+                throw new Error(msg);
+              }
+              return info;
+            });
         })
         .then(function (info) {
-          if (info.error) {
-            mensaje.textContent = info.error;
-            return;
-          }
-
           mensaje.textContent = "Usuario creado ✅";
-          // vamos al login
           window.location.href = "/login";
         })
-        .catch(function () {
-          mensaje.textContent = "Error al registrar";
+        .catch(function (error) {
+          mensaje.textContent = error && error.message ? error.message : "Error al registrar";
         });
     });
   })();
