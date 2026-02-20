@@ -1,3 +1,6 @@
+import passport from "passport";
+import { authorizeRoles } from "../middlewares/authorizeRoles.js";
+
 import { Router } from "express";
 import {
   getProductos,
@@ -9,11 +12,32 @@ import {
 
 const router = Router();
 
-// Rutas de productos (API REST)
+// 🔓 Públicas (cualquiera puede ver productos)
 router.get("/", getProductos);
 router.get("/:pid", getProductoPorId);
-router.post("/", crearProducto);
-router.put("/:pid", actualizarProducto);
-router.delete("/:pid", eliminarProducto);
+
+// 🔒 Solo ADMIN puede crear
+router.post(
+  "/",
+  passport.authenticate("current", { session: false }),
+  authorizeRoles(["admin"]),
+  crearProducto
+);
+
+// 🔒 Solo ADMIN puede actualizar
+router.put(
+  "/:pid",
+  passport.authenticate("current", { session: false }),
+  authorizeRoles(["admin"]),
+  actualizarProducto
+);
+
+// 🔒 Solo ADMIN puede eliminar
+router.delete(
+  "/:pid",
+  passport.authenticate("current", { session: false }),
+  authorizeRoles(["admin"]),
+  eliminarProducto
+);
 
 export default router;

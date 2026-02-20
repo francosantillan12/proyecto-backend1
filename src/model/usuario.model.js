@@ -29,7 +29,15 @@ const usersSchema = new mongoose.Schema({
     ref: "carritos", // ⚠️ tiene que coincidir con el nombre del mongoose.model(...) de tu CarritoModel
     default: null
   },
-  role: {
+    resetToken: {
+    type: String,
+    default: null
+  },
+    resetTokenExp: {
+    type: Date,
+    default: null
+  },
+    role: {
     type: String,
     default: "user"
   }

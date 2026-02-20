@@ -109,5 +109,13 @@ router.get("/register", function (req, res) {
   });
 });
 
+router.get("/reset-password/:token", function (req, res) {
+  res.render("resetPassword", {
+    layout: "main",
+    tituloPagina: "Reset Password",
+    token: req.params.token
+  });
+});
+
 
 export default router;

@@ -1,8 +1,13 @@
+import UserDTO from "../dto/user.dto.js";
 import { Router } from "express";
 import passport from "passport";
 import CarritoModel from "../model/carrito.model.js";
 import UsuarioModel from "../model/usuario.model.js";
 import jwt from "jsonwebtoken";
+
+import crypto from "crypto";
+import { transporter } from "../utils/mailer.js";
+import { createHash, isValidPassword } from "../utils.js";
 
 const router = Router();
 
@@ -115,15 +120,99 @@ router.post("/login", function (req, res, next) {
   })(req, res, next);
 });
 
+// POST /api/sessions/forgot-password
+router.post("/forgot-password", async function (req, res) {
+  try {
+    const { email } = req.body;
 
-// CURRENT (valida JWT desde cookie)
+    if (!email) {
+      return res.status(400).send({ error: "Falta el email" });
+    }
+
+    const usuario = await UsuarioModel.findOne({ email: email });
+    
+    // Por seguridad, respondemos OK aunque no exista
+    if (!usuario) {
+      return res.send({ status: "ok", message: "Si el email existe, se enviará un enlace." });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const expira = new Date(Date.now() + 60 * 60 * 1000); // 1 hora
+
+    usuario.resetToken = token;
+    usuario.resetTokenExp = expira;
+    await usuario.save();
+
+    const link = `${process.env.BASE_URL}/reset-password/${token}`;
+
+    await transporter.sendMail({
+      from: process.env.MAIL_USER,
+      to: usuario.email,
+      subject: "Restablecer contraseña",
+      html: `
+        <h2>Restablecer contraseña</h2>
+        <p>Hacé click en el botón para restablecer tu contraseña (expira en 1 hora).</p>
+        <a href="${link}" style="display:inline-block;padding:10px 14px;background:#222;color:#fff;text-decoration:none;border-radius:6px;">
+          Restablecer contraseña
+        </a>
+        <p>Si no pediste esto, ignorá el correo.</p>
+      `
+    });
+
+    return res.send({ status: "ok", message: "Si el email existe, se enviará un enlace." });
+  } catch (error) {
+    console.log("Error forgot-password:", error);
+    return res.status(500).send({ error: "Error enviando el correo" });
+  }
+});
+
+// POST /api/sessions/reset-password/:token
+router.post("/reset-password/:token", async function (req, res) {
+  try {
+    const { token } = req.params;
+    const { newPassword } = req.body;
+
+    if (!newPassword) {
+      return res.status(400).send({ error: "Falta newPassword" });
+    }
+
+    const usuario = await UsuarioModel.findOne({
+      resetToken: token,
+      resetTokenExp: { $gt: new Date() } // que no haya expirado
+    });
+
+    if (!usuario) {
+      return res.status(400).send({ error: "Token inválido o expirado" });
+    }
+
+    // ❌ No permitir misma contraseña anterior
+    const esLaMisma = isValidPassword(newPassword, usuario.password);
+    if (esLaMisma) {
+      return res.status(400).send({ error: "No podés usar la misma contraseña anterior" });
+    }
+
+    usuario.password = createHash(newPassword);
+    usuario.resetToken = null;
+    usuario.resetTokenExp = null;
+
+    await usuario.save();
+
+    return res.send({ status: "ok", message: "Contraseña actualizada correctamente" });
+  } catch (error) {
+    console.log("Error reset-password:", error);
+    return res.status(500).send({ error: "Error al actualizar la contraseña" });
+  }
+});
+
+// CURRENT ()
 router.get(
   "/current",
   passport.authenticate("current", { session: false }),
   function (req, res) {
-    return res.send({ usuario: req.user });
+    return res.send({ usuario: new UserDTO(req.user) });
   }
 );
+
 
 // LOGOUT (borra cookie JWT)
 router.post("/logout", function (req, res) {

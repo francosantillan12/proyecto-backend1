@@ -1,80 +1,187 @@
-# Proyecto Backend – Ecommerce  
-## Backend I + Backend II (CoderHouse)
+🛒 Proyecto Backend II – Ecommerce (Continuación Backend I)
 
-Este proyecto corresponde a la **continuación del ecommerce desarrollado durante el curso Backend I**, el cual fue extendido y mejorado en **Backend II** incorporando un sistema completo de **autenticación, autorización y gestión de usuarios**.
+Este proyecto es la continuación del trabajo desarrollado en Backend I, donde se construyó la base del ecommerce con:
 
-El objetivo principal es integrar **Passport + JWT** al proyecto existente, manteniendo la lógica previa de productos y carritos, y logrando una aplicación backend funcional y segura.
+CRUD de productos
 
----
+CRUD de carritos
 
-## 🧱 Stack Tecnológico
+MongoDB + Mongoose
 
-- Node.js  
-- Express  
-- MongoDB Atlas  
-- Mongoose  
-- Handlebars  
-- Passport  
-  - LocalStrategy (register / login)  
-  - JWT Strategy (`current`)  
-- bcrypt  
-- JSON Web Tokens (JWT)  
-- Cookies httpOnly  
+Paginación
 
----
+Arquitectura con routers y controllers
 
-## 👤 Modelo de Usuario
+En esta etapa (Backend II) se mejora la arquitectura, seguridad y lógica de negocio, incorporando mecanismos de autenticación y autorización.
 
-- `first_name`
-- `last_name`
-- `email` (único)
-- `age`
-- `password` (encriptada con bcrypt)
-- `cart` (referencia a `Carts`)
-- `role` (valor por defecto: `"user"`)
+🚀 Tecnologías utilizadas
 
-Las contraseñas se almacenan **hasheadas** utilizando `bcrypt`.
+Node.js
 
----
+Express
 
-## 🔐 Autenticación y Autorización
+MongoDB Atlas
 
-### Passport Local
-- Registro de usuarios
-- Login con validación de contraseña
+Mongoose
 
-### JWT
-- En el login se genera un **token JWT**
-- El token se guarda en una **cookie httpOnly**
-- No se utilizan sesiones de Express
+Passport
 
-### Estrategia `current`
-- Valida al usuario a partir del JWT almacenado en la cookie
-- Permite proteger rutas privadas
-- Endpoint implementado:
+JWT (JSON Web Tokens)
 
+Bcrypt
 
----
+Nodemailer
 
-## 🛒 Carritos
+Arquitectura en capas (Router → Controller → Repository → DAO)
 
-- Cada usuario tiene **un carrito propio**
-- El carrito se crea automáticamente al registrarse o al iniciar sesión
-- Las rutas de carritos están protegidas con JWT
-- Un usuario solo puede modificar **su propio carrito**
+🔐 Sistema de Autenticación
 
----
+Se implementa:
 
-## 🖥️ Integración Frontend + Backend
+Registro de usuarios con contraseña encriptada (bcrypt)
 
-El proyecto incluye vistas con **Handlebars** integradas al backend:
+Login con JWT almacenado en cookie httpOnly
 
-- Registro desde la vista
-- Login desde la vista
-- Navbar dinámico según estado de sesión
-- Agregar productos al carrito solo estando autenticado
-- Logout que elimina la cookie JWT
+Estrategia current con Passport
 
+Endpoint /api/sessions/current utilizando DTO para evitar enviar información sensible
 
+DTO implementado
 
+Se utiliza UserDTO para evitar enviar:
+
+password
+
+resetToken
+
+resetTokenExp
+
+🔄 Recuperación de contraseña
+
+Se implementa:
+
+Generación de token seguro
+
+Envío de email con enlace de recuperación
+
+Token con expiración de 1 hora
+
+Validación para evitar reutilizar la misma contraseña anterior
+
+Endpoints:
+
+POST /api/sessions/forgot-password
+POST /api/sessions/reset-password/:token
+👥 Roles y Autorización
+
+Se implementa middleware de autorización basado en roles.
+
+Reglas:
+
+🔓 GET productos → público
+
+🔒 Crear / actualizar / eliminar productos → solo ADMIN
+
+🔒 Agregar productos al carrito → solo USER
+
+🔒 Comprar carrito → solo USER y solo su propio carrito
+
+Middleware utilizado:
+
+passport.authenticate("current")
+
+authorizeRoles(["admin"])
+
+authorizeRoles(["user"])
+
+🧱 Arquitectura Profesional
+
+El proyecto aplica separación en capas:
+
+Router → define endpoints
+
+Controller → lógica de negocio
+
+Repository → intermediario
+
+DAO → acceso directo a base de datos
+
+DTO → transferencia segura de datos
+
+Esto permite:
+
+Escalabilidad
+
+Código más mantenible
+
+Separación clara de responsabilidades
+
+🎟 Sistema de Compra y Ticket
+
+Se implementa modelo Ticket con:
+
+code único
+
+purchase_datetime
+
+amount total
+
+purchaser (email del usuario)
+
+Endpoint:
+
+POST /api/carts/:cid/purchase
+
+Lógica implementada:
+
+Verificación de stock
+
+Compra completa o parcial
+
+Descuento de stock
+
+Generación de ticket
+
+Productos sin stock permanecen en el carrito
+
+⚙️ Variables de entorno
+
+El proyecto utiliza archivo .env (no incluido en el repositorio).
+
+Se provee .env.example como referencia.
+
+Variables necesarias:
+
+PORT
+MONGO_URL
+JWT_SECRET
+MAIL_USER
+MAIL_PASS
+🧪 Cómo probar el proyecto
+
+Clonar repositorio
+
+Instalar dependencias:
+
+npm install
+
+Crear archivo .env usando .env.example
+
+Ejecutar:
+
+npm run dev
+
+Servidor disponible en:
+
+http://localhost:8080
+📌 Estado del proyecto
+
+✔ CRUD completo
+✔ Autenticación con JWT
+✔ Autorización por roles
+✔ Patrón Repository implementado
+✔ DTO para protección de datos
+✔ Recuperación de contraseña con expiración
+✔ Modelo Ticket y lógica de compra robusta
+✔ Manejo de compras parciales
 
