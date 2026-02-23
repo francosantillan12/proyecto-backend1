@@ -5,8 +5,10 @@ import ProductoModel from "../model/producto.model.js";
 import passport from "passport";
 import { authorizeRoles } from "../middlewares/authorizeRoles.js";
 import TicketModel from "../model/ticket.model.js";
+import CartsService from "../services/carts.service.js";
 
 
+const cartsService = new CartsService();
 
 const router = Router();
 
@@ -254,7 +256,7 @@ router.delete("/:cid", async (req, res) => {
   }
 });
 
-// POST /api/carts/:cid/purchase
+// POST "LLAMADA AL SERVICE"
 router.post(
   "/:cid/purchase",
   authorizeRoles(["user"]),
@@ -262,81 +264,24 @@ router.post(
     try {
       const { cid } = req.params;
 
-      // 🔐 Solo puede comprar su propio carrito
-      if (String(req.user.cart) !== String(cid)) {
+      const resultado = await cartsService.purchase(cid, req.user);
+
+      if (resultado.status === "error") {
+        return res.status(400).json(resultado);
+      }
+
+      return res.json(resultado);
+
+    } catch (error) {
+
+      if (error.message === "FORBIDDEN") {
         return res.status(403).json({ error: "No podés comprar con este carrito" });
       }
 
-      // 1) Traer carrito con productos populados
-      const carrito = await CarritoModel.findById(cid).populate("products.product");
-      if (!carrito) {
+      if (error.message === "CART_NOT_FOUND") {
         return res.status(404).json({ error: "Carrito no encontrado" });
       }
 
-      const productosComprados = [];
-      const productosSinStock = [];
-
-      let totalCompra = 0;
-
-      // 2) Recorrer productos del carrito y chequear stock
-      for (const item of carrito.products) {
-        const producto = item.product; // viene populado
-        const cantidad = item.quantity;
-
-        if (!producto) continue;
-
-        // Si hay stock suficiente => se compra
-        if (producto.stock >= cantidad) {
-          // descontar stock
-          producto.stock = producto.stock - cantidad;
-          await producto.save();
-
-          productosComprados.push({
-            product: producto._id,
-            quantity: cantidad
-          });
-
-          totalCompra += (producto.precio || 0) * cantidad;
-
-        } else {
-          // no hay stock suficiente => queda pendiente en carrito
-          productosSinStock.push({
-            product: producto._id,
-            quantity: cantidad
-          });
-        }
-      }
-
-      // 3) Si no se compró nada, no generamos ticket
-      if (productosComprados.length === 0) {
-        return res.status(400).json({
-          status: "error",
-          error: "No se pudo concretar la compra (sin stock disponible)",
-          productosSinStock
-        });
-      }
-
-      // 4) Generar ticket
-      const code = `TCK-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
-
-      const ticket = await TicketModel.create({
-        code,
-        amount: totalCompra,
-        purchaser: req.user.email
-      });
-
-      // 5) Actualizar carrito: solo quedan los productos sin stock
-      carrito.products = productosSinStock;
-      await carrito.save();
-
-      return res.json({
-        status: "success",
-        message: "Compra realizada",
-        ticket,
-        productosSinStock
-      });
-
-    } catch (error) {
       console.error("Error en purchase:", error);
       return res.status(500).json({ error: "Error al finalizar la compra" });
     }
