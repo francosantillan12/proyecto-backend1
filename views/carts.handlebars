@@ -6,6 +6,9 @@
 <!-- Botón para vaciar carrito -->
 <button id="btn-vaciar" class="btn-vaciar">Vaciar carrito</button>
 
+<!-- Botón para finalizar compra -->
+<button id="btn-comprar" class="btn-comprar">Finalizar compra</button>
+
 {{#if carrito.products.length}}
   <ul class="carrito-lista">
     {{#each carrito.products}}
@@ -85,6 +88,33 @@
         .catch(error => {
           console.log("Error al vaciar carrito:", error);
           alert("No se pudo vaciar el carrito");
+        });
+    });
+  }
+
+  /* ================================
+     FINALIZAR COMPRA
+     ================================ */
+  const btnComprar = document.getElementById("btn-comprar");
+
+  if (btnComprar) {
+    btnComprar.addEventListener("click", function () {
+      if (!confirm("¿Confirmar compra?")) return;
+
+      fetch(`/api/carts/${idCarrito}/purchase`, {
+        method: "POST"
+      })
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === "success") {
+            window.location.href = `/ticket/${data.ticket._id}`;  
+          } else {
+            alert(data.error || "No se pudo completar la compra");
+          }
+        })
+        .catch(error => {
+          console.log("Error al finalizar compra:", error);
+          alert("Error al finalizar compra");
         });
     });
   }

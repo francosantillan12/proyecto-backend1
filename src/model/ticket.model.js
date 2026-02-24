@@ -19,7 +19,31 @@ const ticketSchema = new mongoose.Schema({
   purchaser: {
     type: String,
     required: true
-  }
+  },
+  // ✅ Detalle de la compra
+  products: [
+    {
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "productos",
+        required: true
+      },
+      quantity: {
+        type: Number,
+        required: true
+      },
+      // guardamos el precio al momento de comprar (por si cambia después)
+      price: {
+        type: Number,
+        required: true
+      },
+      // guardamos el título al momento de comprar (opcional pero útil)
+      title: {
+        type: String,
+        default: ""
+      }
+    }
+  ]
 });
 
 const TicketModel = mongoose.model(ticketsCollection, ticketSchema);

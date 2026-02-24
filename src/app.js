@@ -60,13 +60,20 @@ app.use(function (req, res, next) {
 });
 
 // Handlebars
+// Handlebars
 app.engine(
   "handlebars",
   engine({
     layoutsDir: path.join(__dirname, "..", "views", "layouts"),
     defaultLayout: "main",
+    helpers: {
+      multiplicar: function (a, b) {
+        return a * b;
+      }
+    }
   })
 );
+
 app.set("view engine", "handlebars");
 app.set("views", path.join(__dirname, "..", "views"));
 

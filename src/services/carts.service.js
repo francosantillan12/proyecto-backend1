@@ -3,7 +3,6 @@ import TicketModel from "../model/ticket.model.js";
 
 class CartsService {
   async purchase(cid, user) {
-
     // 🔐 Solo puede comprar su propio carrito
     if (String(user.cart) !== String(cid)) {
       throw new Error("FORBIDDEN");
@@ -29,13 +28,15 @@ class CartsService {
         producto.stock = producto.stock - cantidad;
         await producto.save();
 
+        // ✅ guardamos detalle para el ticket
         productosComprados.push({
           product: producto._id,
-          quantity: cantidad
+          quantity: cantidad,
+          price: producto.precio || 0,
+          title: producto.titulo || ""
         });
 
         totalCompra += (producto.precio || 0) * cantidad;
-
       } else {
         productosSinStock.push({
           product: producto._id,
@@ -54,12 +55,15 @@ class CartsService {
 
     const code = `TCK-${Date.now()}-${Math.floor(Math.random() * 10000)}`;
 
+    // ✅ Creamos ticket con detalle
     const ticket = await TicketModel.create({
-      code,
+      code: code,
       amount: totalCompra,
-      purchaser: user.email
+      purchaser: user.email,
+      products: productosComprados
     });
 
+    // ✅ Actualizar carrito: solo quedan los productos sin stock
     carrito.products = productosSinStock;
     await carrito.save();
 

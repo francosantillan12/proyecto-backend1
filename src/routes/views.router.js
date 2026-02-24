@@ -1,6 +1,7 @@
 import { Router } from "express";
 import ProductoModel from "../model/producto.model.js";
 import CarritoModel from "../model/carrito.model.js";
+import TicketModel from "../model/ticket.model.js";
 
 
 const router = Router();
@@ -91,6 +92,28 @@ router.get("/carts/:cid", async (req, res) => {
   } catch (error) {
     console.error("Error al renderizar /carts/:cid:", error);
     res.status(500).send("Error al cargar el carrito");
+  }
+});
+
+router.get("/ticket/:tid", async (req, res) => {
+  try {
+    const { tid } = req.params;
+
+    const ticket = await TicketModel.findById(tid);
+
+    if (!ticket) {
+      return res.status(404).send("Ticket no encontrado");
+    }
+
+    res.render("ticket", {
+      layout: "main",
+      tituloPagina: "Comprobante de compra",
+      ticket: ticket.toObject()
+    });
+
+  } catch (error) {
+    console.error("Error al renderizar ticket:", error);
+    res.status(500).send("Error al cargar el ticket");
   }
 });
 
